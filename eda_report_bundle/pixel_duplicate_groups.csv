@@ -1,0 +1,5 @@
+﻿pixel_sha256,n_files,n_splits,splits,paths
+1504a8dba634c360f55d1a375e44cd611b7e514a19f9be72ccb7f030022669f7,2,1,train,"[""images/train/quandoi90.jpg"", ""images/train/quandoi92.jpg""]"
+4eee84d3add852512088bdc2587effbafcd419de4c6b5ce9fefc75277dcda685,2,1,train,"[""images/train/quandoi102.jpg"", ""images/train/quandoi99.jpg""]"
+841901509eb20ad34049743f9c9cece026cd1008773849a8ca58f3eac61adc26,2,1,test,"[""images/test/quandoi73.jpg"", ""images/test/quandoi75.jpg""]"
+c63df6c2b17c2432dc723987b6d8e824687540dfb4b10e1b95b98d09ee2c0202,2,2,train|val,"[""images/train/quandoi64.jpg"", ""images/val/quandoi50.jpg""]"

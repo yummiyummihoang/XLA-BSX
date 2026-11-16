@@ -1,0 +1,11 @@
+/License Plate Detection Dataset/
+/eda_report_bundle/*
+!/eda_report_bundle/report_vi.md
+!/eda_report_bundle/pixel_duplicate_groups.csv
+!/eda_report_bundle/dhash_candidates.csv
+.ipynb_checkpoints/
+__pycache__/
+.venv/
+.env
+/outputs/
+*.sqlite3
