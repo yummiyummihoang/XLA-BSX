@@ -1,0 +1,9 @@
+{
+  "weights": "train/weights/best.pt",
+  "imgsz": 640,
+  "iou_nms": 0.45,
+  "max_det": 5,
+  "threshold": 0.43,
+  "pretrained": false,
+  "epochs": 12
+}

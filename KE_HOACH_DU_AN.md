@@ -5,8 +5,8 @@
 Ứng dụng nhận một ảnh tại cổng, hiển thị các biển số phát hiện được, đọc biển người dùng chọn và ghi nhận xe vào hoặc ra sau khi người dùng xác nhận. Màn hình lịch sử cho phép tra cứu biển số, giờ vào, giờ ra và các xe đang gửi.
 
 - **Bản demo chính:** ảnh tải lên, giao diện Streamlit, SQLite, thao tác xác nhận hoặc sửa biển số. Nếu có nhiều biển trong ảnh, người dùng chọn đúng một biển cho mỗi giao dịch.
-- **Ràng buộc bắt buộc:** toàn bộ pipeline dùng xử lý ảnh cổ điển. Không dùng pretrain, trọng số tải sẵn, fine-tuning hay OCR đóng gói có mô hình học sẵn. OpenCV và NumPy dùng để triển khai các phép xử lý ảnh và so khớp.
-- **Phần phát hiện:** Gaussian → Sobel hoặc Canny → phép đóng → tìm và lọc vùng ứng viên theo hình học.
+- **Ràng buộc bắt buộc:** dùng các phép xử lý ảnh cổ điển và huấn luyện SVM từ đầu trên dữ liệu của dự án. Không dùng pretrain, trọng số tải sẵn, fine-tuning hay OCR đóng gói có mô hình học sẵn.
+- **Phần phát hiện:** Gaussian → Sobel hoặc Canny → phép đóng → lọc vùng theo hình học → HOG + SVM để loại vùng nhiễu. Giữ kết quả Sobel/Canny trước SVM làm mốc so sánh.
 - **Phần đọc biển:** hiệu chỉnh góc, nhị phân hóa và tách ký tự, sau đó so khớp với bộ mẫu tự cắt và gán nhãn từ tập train của dự án.
 - **Mở rộng sau demo:** lấy một khung hình từ webcam và đưa vào cùng pipeline.
 
@@ -24,12 +24,13 @@
 ```text
 OFFLINE · Chuẩn bị dữ liệu, mẫu ký tự và đánh giá
 Ảnh + nhãn khung → rà soát trùng ảnh và nhãn → manifest train/val/test
-    ├─ Train → cắt và gán nhãn ký tự → thư viện mẫu theo lớp
-    ├─ Val   → chỉnh ngưỡng tìm vùng, tách ký tự và so khớp → khóa cấu hình
+    ├─ Train → tạo đặc trưng HOG và huấn luyện SVM từ nhãn khung
+    │        → cắt và gán nhãn ký tự → thư viện mẫu theo lớp
+    ├─ Val   → chọn cấu hình tìm vùng, SVM, tách ký tự và so khớp
     └─ Test  → đánh giá phát hiện, đọc ký tự và toàn pipeline → báo cáo
 
 ONLINE · Ghi nhận xe qua cổng
-Ảnh → Gaussian → Sobel/Canny → phép đóng → lọc khung → chọn biển
+Ảnh → Gaussian → Sobel/Canny → phép đóng → lọc khung → HOG + SVM → chọn biển
     → cắt và chỉnh nghiêng → Otsu → tách dòng và ký tự → so khớp mẫu
     → chuẩn hóa chuỗi → hiện kết quả cho người dùng
     → người dùng xác nhận/sửa → chọn Xe vào hoặc Xe ra → ghi SQLite
@@ -53,6 +54,14 @@ ONLINE · Ghi nhận xe qua cổng
 | Canny | Chuyển xám → Gaussian → Canny → phép đóng → tìm contour. | Cùng định dạng đầu ra để so sánh trực tiếp với Sobel. |
 
 Lọc ứng viên theo diện tích tương đối, độ chữ nhật và hai khoảng tỷ lệ rộng/cao cho biển một dòng và hai dòng. Gộp ứng viên trùng vùng theo IoU để tránh hiện một biển nhiều lần. Lưu kernel, ngưỡng biên và tham số lọc đã chọn trên val. Quy đổi tọa độ về ảnh gốc nếu có resize, giới hạn tọa độ trong biên và loại hộp rỗng. Chọn nhánh tích hợp bằng kết quả val và thời gian chạy trên máy demo.
+
+Huấn luyện bộ lọc SVM tuyến tính trong [notebook HOG + SVM](train-svm-detector.ipynb). Trên train, dùng nhãn khung thật và ứng viên có IoU ≥ 0,5 làm ví dụ dương, ứng viên có IoU ≤ 0,2 làm ví dụ âm. Mỗi vùng được biểu diễn bằng histogram hướng gradient. Dùng val chọn `C` và ngưỡng điểm SVM theo F1. Chấm Sobel và Sobel + SVM trên cùng ảnh test với cùng vùng ứng viên để đo thay đổi precision và recall.
+
+[Notebook tối ưu](optimize-svm-detector.ipynb) tăng độ phủ bằng nhiều kích thước kernel kết hợp Sobel, Canny và phép black-hat. Notebook huấn luyện lại trên các vùng do cấu hình mới sinh, sau đó khử khung trùng theo điểm SVM. Kết quả đo cả độ phủ trước lọc và chất lượng detector sau lọc.
+
+[Notebook hồi quy khung](refine-svm-detector.ipynb) đưa đặc trưng HOG vào hồi quy Ridge để chỉnh vị trí và kích thước của vùng ứng viên. Cách này dựa trên ý tưởng chỉnh khung trong R-CNN và học từ nhãn `train` của dự án. [Bài báo R-CNN](https://arxiv.org/abs/1311.2524)
+
+Thử thêm YOLOv8n để so sánh khả năng tìm biển trực tiếp trên ảnh. Script `scripts/train_yolo.py` khởi tạo kiến trúc từ YAML, huấn luyện từ đầu trên GPU, chọn ngưỡng theo F1 của `val` rồi chấm trên cùng `test` với SVM. Kiến trúc tham khảo từ dự án nhận diện biển Việt Nam. [Vietnamese ALPR System](https://github.com/TuanNghiaFunPie/vietnamese-alpr-system)
 
 ### 2.3. Cắt biển và đọc ký tự
 
@@ -91,7 +100,7 @@ Chọn cấu hình bằng val rồi mới chấm test. Chốt mục tiêu độ 
 | Mốc | Việc thực hiện | Điều kiện qua mốc |
 |---|---|---|
 | Tuần 1 · Dữ liệu | Rà ảnh trùng, xuất manifest, gán chuỗi cho 30 biển val và cắt mẫu ký tự từ train. | Split được kiểm tra, có bộ mẫu truy về ảnh gốc và bộ crop val để thử. |
-| Tuần 2 · Phát hiện | Làm nhánh Sobel và Canny, bổ sung ảnh âm tính, chốt ngưỡng lọc ứng viên trên val. | Khung trả về theo tọa độ ảnh gốc và có bảng so sánh hai nhánh. |
+| Tuần 2 · Phát hiện | Làm nhánh Sobel và Canny, huấn luyện SVM trên train, chọn ngưỡng lọc trên val và bổ sung ảnh âm tính. | Khung theo tọa độ ảnh gốc, mô hình SVM và bảng so sánh trước và sau lọc. |
 | Tuần 3 · Đọc biển và tích hợp | So các cách nhị phân hóa, tách ký tự, so khớp mẫu MSE, ghép với bước phát hiện rồi khóa cấu hình và chạy test. | Một lệnh nhận ảnh và xuất kết quả. Có bảng phát hiện, đọc ký tự và toàn pipeline. |
 | Tuần 4 · Bãi xe và báo cáo | Tích hợp Streamlit và SQLite, kiểm thử giao dịch, chuẩn bị demo và viết báo cáo. | Chạy được từ ảnh tới lịch sử, qua đủ ca nghiệm thu và có hướng dẫn chạy trên máy khác. |
 
