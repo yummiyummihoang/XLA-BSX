@@ -4,7 +4,7 @@
 
 ## Tiến độ
 
-Repo hiện có [kế hoạch triển khai](KE_HOACH_DU_AN.md), [notebook khám phá dữ liệu](kham-pha-dataset.ipynb), [tóm tắt EDA](eda_report_bundle/report_vi.md) và cấu trúc mã nguồn ban đầu. Các mô-đun nhận diện và ghi lượt xe đang chờ triển khai.
+Repo hiện có [kế hoạch triển khai](KE_HOACH_DU_AN.md), [notebook khám phá dữ liệu](kham-pha-dataset.ipynb), [tóm tắt EDA](eda_report_bundle/report_vi.md) và giao diện YOLO để tìm vùng biển số. OCR và ghi lượt xe là các bước bàn giao tiếp theo.
 
 ## Cấu trúc và chạy giao diện
 
@@ -21,6 +21,10 @@ outputs/     Kết quả cục bộ, được tạo khi chạy các bước xử
 python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
+
+Chọn **Ảnh xe** để tải ảnh lên. Nếu thư mục dataset nằm cạnh `app.py` trong `CuoiKy`, có thể bấm **Thử ảnh mẫu**. Giao diện dùng YOLO trên CPU để hiển thị vị trí và ảnh cắt của mỗi biển.
+
+Đầu vào cho OCR là ảnh cắt từ các khung `result.boxes.xyxy` trong `app.py`. Dataset có nhãn khung, nên cần bổ sung chuỗi biển đúng để chấm OCR. Script chuẩn bị mẫu và số liệu tham khảo nằm trong [hướng dẫn scripts](scripts/README.md).
 
 ## Pipeline dự kiến
 
