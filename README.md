@@ -24,6 +24,8 @@ python -m streamlit run app.py
 
 Chọn **Ảnh xe** để tải ảnh lên. Nếu thư mục dataset nằm cạnh `app.py` trong `CuoiKy`, có thể bấm **Thử ảnh mẫu**. Giao diện dùng YOLO trên CPU để hiển thị vị trí và ảnh cắt của mỗi biển.
 
+Chọn **Video** để tải clip xe ra vào, rồi bấm **Bắt đầu nhận diện**. App cập nhật khung có đánh dấu biển ngay khi xử lý. Mặc định AI phân tích khoảng 3 khung hình trên mỗi giây video để chạy nhẹ hơn trên CPU. Chọn **Mọi khung hình** nếu cần kiểm tra từng khung. Tốc độ xem trước phụ thuộc vào tốc độ xử lý của máy.
+
 Đầu vào cho OCR là ảnh cắt từ các khung `result.boxes.xyxy` trong `app.py`. Dataset có nhãn khung, nên cần bổ sung chuỗi biển đúng để chấm OCR. Script chuẩn bị mẫu và số liệu tham khảo nằm trong [hướng dẫn scripts](scripts/README.md).
 
 ## Pipeline dự kiến
