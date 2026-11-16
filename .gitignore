@@ -8,4 +8,6 @@ __pycache__/
 .venv/
 .env
 /outputs/
+/data/templates/
+/data/gate_samples/
 *.sqlite3

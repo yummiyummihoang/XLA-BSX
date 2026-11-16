@@ -4,7 +4,23 @@
 
 ## Tiến độ
 
-Repo hiện có [kế hoạch triển khai](KE_HOACH_DU_AN.md), [notebook khám phá dữ liệu](kham-pha-dataset.ipynb) và [tóm tắt EDA](eda_report_bundle/report_vi.md). Phần nhận diện và ứng dụng bãi xe đang ở giai đoạn thiết kế.
+Repo hiện có [kế hoạch triển khai](KE_HOACH_DU_AN.md), [notebook khám phá dữ liệu](kham-pha-dataset.ipynb), [tóm tắt EDA](eda_report_bundle/report_vi.md) và cấu trúc mã nguồn ban đầu. Các mô-đun nhận diện và ghi lượt xe đang chờ triển khai.
+
+## Cấu trúc và chạy giao diện
+
+```text
+app.py       Giao diện Streamlit ban đầu
+src/         Phát hiện, tiền xử lý, tách ký tự, so khớp, pipeline và lưu lượt xe
+data/        Manifest, nhãn ký tự và mô tả dữ liệu cục bộ
+configs/     Tham số xử lý ảnh và cấu hình đánh giá
+scripts/     Chuẩn bị dữ liệu, tạo mẫu và đánh giá
+outputs/     Kết quả cục bộ, được tạo khi chạy các bước xử lý
+```
+
+```powershell
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
 
 ## Pipeline dự kiến
 
